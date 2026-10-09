@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feliz Día de las Flores Moradas - Karla 💜</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      overflow: hidden;
+      background-color: #02000a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
+    }
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+
+    /* Pantalla de bienvenida */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, #0c021f 0%, #02000a 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      cursor: pointer;
+      transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .flower-container {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      filter: drop-shadow(0 0 25px rgba(192, 132, 252, 0.9)) drop-shadow(0 0 50px rgba(147, 51, 234, 0.7));
+      animation: heartbeat 2.2s infinite ease-in-out;
+      transition: transform 0.4s ease;
+    }
+
+    .flower-container:hover {
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 40px rgba(216, 180, 254, 1)) drop-shadow(0 0 70px rgba(168, 85, 247, 0.9));
+    }
+
+    .flower-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    #start-screen p {
+      color: #f5f3ff;
+      margin-top: 30px;
+      font-size: 1.6rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-family: 'Times New Roman', Times, serif;
+      text-shadow: 0 0 12px rgba(192, 132, 252, 0.9), 0 0 25px rgba(147, 51, 234, 0.6);
+      animation: pulseText 2.2s infinite ease-in-out;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.07); }
+    }
+
+    @keyframes pulseText {
+      0%, 100% { opacity: 0.7; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-5px); }
+    }
+
+    .fade-out-galaxy {
+      opacity: 0 !important;
+      transform: scale(3.5) !important;
+      pointer-events: none;
+    }
+
+    /* Título neón superior */
+    #main-title {
+      position: absolute;
+      top: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      color: #f3e8ff;
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-shadow: 
+        0 0 10px #c084fc,
+        0 0 20px #c084fc,
+        0 0 40px #a855f7,
+        0 0 80px #7e22ce;
+      pointer-events: none;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* Botón flotante de sobre de carta */
+    #letter-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.8), 0 0 50px rgba(236, 72, 153, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 20;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+      animation: pulseBtn 2s infinite ease-in-out;
+    }
+
+    #letter-btn:hover {
+      transform: scale(1.15) rotate(5deg);
+      box-shadow: 0 0 35px rgba(168, 85, 247, 1), 0 0 70px rgba(236, 72, 153, 0.8);
+    }
+
+    #letter-btn span {
+      font-size: 2rem;
+    }
+
+    @keyframes pulseBtn {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* Modal emergente de la carta */
+    #letter-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(4, 0, 15, 0.8);
+      backdrop-filter: blur(14px);
+      z-index: 30;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      padding: 1rem;
+    }
+
+    #letter-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .letter-card {
+      background: linear-gradient(145deg, rgba(26, 11, 46, 0.96), rgba(12, 2, 31, 0.98));
+      border: 1px solid rgba(216, 180, 254, 0.4);
+      border-radius: 24px;
+      padding: 2.5rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 60px rgba(168, 85, 247, 0.45), inset 0 0 25px rgba(168, 85, 247, 0.2);
+      color: #f3e8ff;
+      position: relative;
+      transform: translateY(40px) scale(0.9);
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+    }
+
+    /* Scrollbar estilizada */
+    .letter-card::-webkit-scrollbar {
+      width: 6px;
+    }
+    .letter-card::-webkit-scrollbar-thumb {
+      background: rgba(192, 132, 252, 0.5);
+      border-radius: 10px;
+    }
+
+    #letter-modal.active .letter-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #e9d5ff;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: rgba(236, 72, 153, 0.6);
+    }
+
+    .letter-card h2 {
+      font-size: 2rem;
+      margin-bottom: 1.2rem;
+      color: #fef08a;
+      text-shadow: 0 0 15px rgba(254, 240, 138, 0.6);
+      font-family: 'Georgia', serif;
+    }
+
+    /* Foto cuadrada y completa en la carta */
+    .letter-photo-wrapper {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 1.5rem auto;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid rgba(216, 180, 254, 0.6);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), 0 0 35px rgba(254, 240, 138, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .letter-photo-wrapper:hover {
+      transform: scale(1.05);
+    }
+
+    .letter-photo {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      background-color: rgba(15, 7, 30, 0.6);
+    }
+
+    .letter-card p {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+      margin-bottom: 1.2rem;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: justify;
+    }
+
+    .letter-card .signature {
+      text-align: right;
+      font-style: italic;
+      color: #c084fc;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <!-- Pantalla de inicio de Jhampier -->
+  <div id="start-screen">
+    <div class="flower-container">
+      <img class="flower-img" src="img/flor_de_incio-removebg-preview.png" alt="Flor de Jhampier para Karla" />
+    </div>
+    <p>Para ti, Karla</p>
+  </div>
+
+  <h1 id="main-title">Feliz Día de las Flores Moradas 🪻</h1>
+
+  <!-- Botón de la carta -->
+  <div id="letter-btn" title="Abrir mensaje especial de Jhampier">
+    <span>💌</span>
+  </div>
+
+  <!-- Modal con la Carta e Imagen -->
+  <div id="letter-modal">
+    <div class="letter-card">
+      <button class="close-btn" id="close-modal">&times;</button>
+      <h2>Para mi gran amiga Karla 💜</h2>
+      
+      <div class="letter-photo-wrapper">
+        <img class="letter-photo" src="https://res.cloudinary.com/oixtro0v/image/upload/v1791584769/WhatsApp_Image_2026-10-09_at_17.20.58.jpg" alt="Foto especial Karla">
+      </div>
+
+      <p>
+        Karla, construí esta galaxia de flores moradas para recordarte lo enormemente valiosa que eres. Tener tu amistad es contar con alguien auténtica, leal e incondicional. En los días buenos y en los no tan buenos, siempre tendrás en mí a un mejor amigo que te admira, te escucha y te apoya sin dudar.
+      </p>
+      <p>
+        Que este espacio te devuelva un poco de la luz y alegría que regalas a quienes te rodean. ¡Haz brillar siempre tu esencia, Karla! ✨🌸
+      </p>
+      <div class="signature">Tu mejor amigo,<br>Jhampier 💕</div>
+    </div>
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <!-- Audio de fondo implementado -->
+  <audio id="background-music" loop preload="auto">
+    <source src="https://res.cloudinary.com/oixtro0v/video/upload/v1791585615/Nasa_Histoires_-_Bugambilia.mp3" type="audio/mpeg">
+  </audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
